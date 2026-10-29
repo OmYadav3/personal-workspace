@@ -1,0 +1,28 @@
+{
+   "name": "personal-workspace",
+   "version": "1.0.0",
+   "private": true,
+   "type": "module",
+   "workspaces": [
+      "apps/api",
+      "apps/web",
+      "packages/shared"
+   ],
+   "scripts": {
+      "dev:api": "npm run dev -w apps/api",
+      "dev:web": "npm run dev -w apps/web",
+      "build:shared": "npm run build -w packages/shared",
+      "test": "npm run test --workspaces --if-present",
+      "lint": "npm run lint --workspaces --if-present",
+      "format": "prettier --write .",
+      "format:check": "prettier --check ."
+   },
+   "overrides": {
+      "ts-api-utils": {
+         "typescript": "6.0.3"
+      }
+   },
+   "devDependencies": {
+      "prettier": "^3.9.10"
+   }
+}
