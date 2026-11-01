@@ -9,9 +9,12 @@
       "packages/shared"
    ],
    "scripts": {
-      "dev:api": "npm run dev -w apps/api",
-      "dev:web": "npm run dev -w apps/web",
-      "build:shared": "npm run build -w packages/shared",
+      "dev:api": "npm run dev -w @personal-workspace/api",
+      "dev:web": "npm run dev -w @personal-workspace/web",
+      "build:shared": "npm run build -w @personal-workspace/shared",
+      "typecheck:api": "npm run typecheck -w @personal-workspace/api",
+      "build:web": "npm run build -w @personal-workspace/web",
+      "build": "npm run build:shared && npm run typecheck:api && npm run build:web",
       "test": "npm run test --workspaces --if-present",
       "lint": "npm run lint --workspaces --if-present",
       "format": "prettier --write .",
