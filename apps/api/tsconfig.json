@@ -1,29 +1,40 @@
 {
    "compilerOptions": {
-      "target": "ES2022",
-      "module": "NodeNext",
-      "moduleResolution": "NodeNext",
-      "rootDir": "./src",
-      "outDir": "./dist",
-      "lib": ["ES2022"],
-      "types": ["node"],
+      "target": "ES2022", // Set the avaScript language features TypeScript emits
+      "module": "NodeNext", // Uses Node.js ESM/CommonJS module rules
+      "moduleResolution": "NodeNext", //Resolves imports according to Node.js rules
+      "rootDir": "./src", //Expected root directory of emitted source files
+      "outDir": "./dist", //Directory to output .js files after compilation
+      "lib": ["ES2022"], //Include the built-in JavaScript library files for ES2022
+      "types": ["node"], //Include type definitions for Node.js
 
-      "strict": true,
-      "noUncheckedIndexedAccess": true,
-      "exactOptionalPropertyTypes": true,
-      "noUnusedLocals": true,
-      "noUnusedParameters": true,
-      "noFallthroughCasesInSwitch": true,
+      "strict": true, //Unsafe typing and null-related mistakes are prevented by enabling all strict type-checking options
 
-      "esModuleInterop": true,
-      "verbatimModuleSyntax": true,
-      "isolatedModules": true,
-      "forceConsistentCasingInFileNames": true,
-      "skipLibCheck": true,
+      "noUncheckedIndexedAccess": true, //Enables strict checking of property accesses on objects with index signatures
 
-      "sourceMap": true,
-      "declaration": false
+      "exactOptionalPropertyTypes": true, // Ensures that optional properties are treated as exactly the specified type, rather than allowing undefined values
+
+      "noUnusedLocals": true, // Reports errors on unused local variables, helping to keep the code clean and maintainable
+
+      "noUnusedParameters": true, // Reports errors on unused function parameters, helping to keep the code clean and maintainable
+
+      "noFallthroughCasesInSwitch": true, // Reports errors when a switch statement falls through to the next case without an explicit break or return statement, preventing unintended behavior
+
+      "esModuleInterop": true, // Enables compatibility with CommonJS modules by allowing default imports from modules that don't have a default export
+
+      "verbatimModuleSyntax": true, // Ensures that the emitted JavaScript code preserves the original module syntax, rather than transforming it to a different format
+
+      "isolatedModules": true, // Ensures that each file can be safely transpiled independently, which is important for projects that use tools like Babel or Webpack for bundling
+
+      "forceConsistentCasingInFileNames": true, // Ensures that file names are treated with consistent casing across the project, preventing issues on case-sensitive file systems
+
+      "skipLibCheck": true, // Skips type checking of declaration files (.d.ts) to improve compilation speed, especially for large projects with many dependencies
+
+      "sourceMap": true, // Generates source maps for easier debugging of the emitted JavaScript code
+
+      "declaration": false // Disables the generation of declaration files (.d.ts) for the emitted JavaScript code, which can be useful for projects that don't need to expose type information to consumers
    },
-   "include": ["src/**/*.ts"],
-   "exclude": ["node_modules", "dist"]
+   "include": ["src/**/*.ts"], // Specifies the files to be included in the compilation process, in this case, all TypeScript files in the src directory and its subdirectories
+
+   "exclude": ["node_modules", "dist"] // Specifies the files and directories to be excluded from the compilation process, in this case, the node_modules directory and the dist directory where compiled output is generated
 }
