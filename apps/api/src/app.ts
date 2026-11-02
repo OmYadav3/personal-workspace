@@ -1,9 +1,11 @@
-import express from "express";
+import express, { type Response  } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 
+
 const app = express();
+
 
 /* MIDDLEWARES - HELMET WHICH PROVIDES SECURITY FOR HEADERS */
 app.use(helmet());
@@ -20,9 +22,17 @@ app.use(express.urlencoded({ extended: true }));
 /* MIDDLEWARES - COOKIE PARSING WHICH ALLOWS US TO ACCESS COOKIES */
 app.use(cookieParser());
 
+
+
 /* HEALTH CHECK ENDPOINT */
-app.get("/", (_, res) => {
-   res.send("Healthy Mind API is running");
+app.get("/", (_, res: Response) => {
+   return res.status(200).json({
+      success: true,
+      message: "Server is Healthy Now "
+   })
 });
+
+
+
 
 export { app };

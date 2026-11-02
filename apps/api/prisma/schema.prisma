@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -21,6 +20,11 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  sessions           Session[]
+  emailverifications EmailVerfication[]
+  password_resets    PasswordReset[]
+  UserPrefrences     UserPrefrence[]
+
   @@map("users")
 }
 
@@ -28,4 +32,80 @@ enum UserStatus {
   ACTIVE
   SUSPENDED
   DELETED
+}
+
+model Session {
+  id String @id @default(uuid()) @db.Uuid
+
+  userId           String  @map("user_id") @db.Uuid
+  refreshTokenHash String  @unique @map("refresh_token_hash")
+  tokenFamilyId    String  @map("token_family_id") @db.Uuid
+  deviceInfo       String? @map("device_info")
+
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt() @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenFamilyId])
+  @@map("sessions")
+}
+
+model EmailVerfication {
+  id String @id @default(uuid()) @db.Uuid
+
+  userId   String @map("user_id") @db.Uuid
+  codeHash String @map("code_hash")
+  attempts Int    @default(0)
+
+  expiresAt  DateTime  @map("expires_at")
+  consumedAt DateTime? @map("consumed_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("email_verifications")
+}
+
+model PasswordReset {
+  id String @id @default(uuid()) @db.Uuid
+
+  userId    String @map("user-id") @db.Uuid
+  tokenHash String @unique @map("token_hash")
+
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_resets")
+}
+
+model UserPrefrence {
+  id String @id @default(uuid()) @db.Uuid
+
+  userId   String @unique @map("user_id") @db.Uuid
+  theme    Theme  @default(SYSTEM)
+  timezone String @default("UTC") @db.VarChar(100)
+  settings Json   @default("{}")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_prefrences")
+}
+
+enum Theme {
+  SYSTEM
+  LIGHT
+  DARK
 }
