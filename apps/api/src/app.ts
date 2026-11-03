@@ -2,6 +2,7 @@ import express, { type Response  } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
+import errorMiddleware from "./middlewares/error.middleware.js";
 
 
 const app = express();
@@ -32,6 +33,21 @@ app.get("/", (_, res: Response) => {
    })
 });
 
+
+/* IMPORT ROUTES */
+import authRoute from "./modules/auth/auth.route.js";
+
+
+
+/* IMPLEMENT ROUTES */
+app.use("/api/v1/auth", authRoute);
+
+
+
+
+
+/* MIDDLEWARES - ERROR HANDLER */
+app.use(errorMiddleware);   
 
 
 
