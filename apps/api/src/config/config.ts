@@ -21,6 +21,17 @@ if(!Number.isInteger(port) || port <= 0 || port > 65535) {
 
 export const config = {
   NODE_ENV: process.env.NODE_ENV ?? 'development',
+
   PORT: port,
   DATABASE_URL: requireEnv('DATABASE_URL'),
+
+  REFRESH_TOKEN_SECRET: requireEnv('JWT_REFRESH_TOKEN_SECRET'),
+  REFRESH_TOKEN_EXPIRATION: requireEnv('JWT_REFRESH_TOKEN_EXPIRATION'),
+
+  ACCESS_TOKEN_SECRET: requireEnv('JWT_ACCESS_TOKEN_SECRET'),
+  ACCESS_TOKEN_EXPIRATION: requireEnv('JWT_ACCESS_TOKEN_EXPIRATION'),
+
+  REFRESH_TOKEN_ALGORITHM: requireEnv('JWT_REFRESH_TOKEN_ALGORITHM'),
+  ACCESS_TOKEN_ALGORITHM: requireEnv('JWT_ACCESS_TOKEN_ALGORITHM'),
+
 } as const;
