@@ -29,3 +29,5 @@ export const registerUserSchema = z
       query: z.object({}),
    })
    .strict();
+
+export type registeruserDTO = z.infer<typeof registerUserSchema>;
