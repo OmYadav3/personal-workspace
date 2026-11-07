@@ -1,50 +1,42 @@
-import { prisma } from "../../lib/prsima.js"
-
-interface CreateUserInput {
-  name: string;
-  username: string;
-  email: string;
-  passwordHash: string;
-}
+import { prisma } from "../../lib/prsima.js";
+import type { createUserDTO } from "./auth.dto.js";
 
 export const AuthRepository = {
    findUserByUsername: async (username: string) => {
-      const user = await prisma.user.findUnique(
-         {
-            where: { username }
-         }
-      )
+      const user = await prisma.user.findUnique({
+         where: { username },
+      });
 
       return user;
    },
-
 
    findUserByEmail: async (email: string) => {
-      const user = await prisma.user.findUnique(
-         {
-            where: { email }
-         }
-      )
+      const user = await prisma.user.findUnique({
+         where: { email },
+      });
 
       return user;
    },
 
-
-   createUser: async (data:CreateUserInput) => {
-      const user = await prisma.user.create(
-         {
-            data: {
-               name: data.name,
-               username: data.username,
-               email: data.email,
-               passwordHash: data.passwordHash 
-            }
+   createUser: async (data: createUserDTO) => {
+      const user = await prisma.user.create({
+         data: {
+            name: data.name,
+            username: data.username,
+            email: data.email,
+            passwordHash: data.passwordHash,
+         },
+         select: {
+            id: true,
+            name: true,
+            username: true,
+            email: true,
+            emailVerifiedAt: true,
+            status: true,
+            createdAt: true
          }
-      )
+      });
 
       return user;
    },
-
-
-}
-
+};

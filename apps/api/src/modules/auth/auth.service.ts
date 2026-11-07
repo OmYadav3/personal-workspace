@@ -1,35 +1,32 @@
 import { ApiError } from "../../utils/ApiError.js";
 import { hashPassword } from "../../utils/auth.helper.js";
-import { AuthRepository } from "./auth.repository.js"
-import type { registeruserDTO } from "./auth.schema.js";
+import type { RegisterUserDTO } from "./auth.dto.js";
+import { AuthMapper } from "./auth.mapper.js";
+import { AuthRepository } from "./auth.repository.js";
 
 export const AuthService = {
-   registerUser: async (data: registeruserDTO) => {
-
-      const {name, username, email, password} = data.body;
+   registerUser: async (data: RegisterUserDTO) => {
+      const { name, username, email, password } = data;
 
       const isUsernameExist = await AuthRepository.findUserByUsername(username);
       if (isUsernameExist) {
-         throw new ApiError(409, "Username Already Exists")
+         throw new ApiError(409, "Username Already Exists");
       }
 
-      const isEmailExists = await AuthRepository.findUserByEmail(email)
+      const isEmailExists = await AuthRepository.findUserByEmail(email);
       if (isEmailExists) {
-         throw new ApiError(409, "Email already Exists ")
+         throw new ApiError(409, "Email already Exists ");
       }
 
-      const HashedPassword = await hashPassword(password);
+      const hashedPassword = await hashPassword(password);
 
-      const newUser = await AuthRepository.createUser(
-         {
-            name,
-            username,
-            email,
-            passwordHash: HashedPassword,
-         }
-      )
+      const newUser = await AuthRepository.createUser({
+         name,
+         username,
+         email,
+         passwordHash: hashedPassword,
+      });
 
-      return newUser;
-      
-   }
-}
+      return AuthMapper.toUserResponse(newUser);
+   },
+};
