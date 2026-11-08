@@ -1,4 +1,4 @@
-import type { UserResponseDTO } from "./auth.dto.js"
+import type { UserLoginResponseDTO, UserResponseDTO } from "./auth.dto.js"
 
 export const AuthMapper = { 
 
@@ -11,6 +11,6 @@ export const AuthMapper = {
          status: user.status,
          createdAt: user.createdAt,
       }
-   }
+   },
 
  }
