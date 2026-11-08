@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { loginUserController, registerUserController } from './auth.controller.js';
 import { validate } from '../../middlewares/validate.middleware.js';
-import { registerUserSchema } from './auth.schema.js';
-import { jwtVerify } from '../../middlewares/jwtVerify.middlware.js';
+import { loginUserSchema, registerUserSchema } from './auth.schema.js';
+
 
 
 const router = Router();
@@ -16,8 +16,7 @@ router.route('/register').post(
 
 /* LOGIN ROUTE */
 router.route('/login').post(
-   jwtVerify,
-   validate(registerUserSchema),
+   validate(loginUserSchema),
    loginUserController);
 
 

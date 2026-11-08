@@ -38,8 +38,7 @@ export const jwtVerify: RequestHandler = async (
       if (!user) {
          throw new ApiError(401, "User not found");
       }
-      // TODO:   make model schemas be correct 
-      // TODO:   clean register controller and service for garbage of testing 
+
       // TODO:   check the session found by id or not 
       // TODO:   check the session is already revoked or not 
 

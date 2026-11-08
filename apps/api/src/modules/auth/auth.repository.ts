@@ -1,10 +1,10 @@
 import { prisma } from "../../lib/prsima.js";
-import type { createUserDTO, createUserSessionDTO } from "./auth.dto.js";
+import type { createUserDTO } from "./auth.dto.js";
 
 export const AuthRepository = {
-   findUserById: async (id: string) => {
+   findUserById: async (userId: string) => {
       const user = await prisma.user.findUnique({
-         where: { id },
+         where: { id: userId },
          select: {
             id: true,
             name: true,
@@ -54,28 +54,7 @@ export const AuthRepository = {
       });
 
       return user;
-   },
-   createUserSession: async (data: createUserSessionDTO) => {
-      const session = await prisma.session.create({
-         data: {
-            id: data.id,
-            userId: data.userId,
-            refreshTokenHash: data.refreshTokenHash,
-            tokenFamilyId: data.tokenFamilyId,
-            expiresAt: data.expiresAt,
-         },
-         select: {
-            id: true,
-            userId: true,
-            refreshTokenHash: true,
-            tokenFamilyId: true,
-            expiresAt: true,
-            revokedAt: true,
-            createdAt: true,
-            updatedAt: true,
-         },
-      });
+   }
 
-      return session;
-   },
+
 };
