@@ -25,3 +25,19 @@ export interface UserResponseDTO {
    status: string;
    createdAt: Date;
 }
+
+export interface RegisterUserSessionDTO {
+   id: string
+   userId: string;
+   refreshTokenHash: string;
+   tokenFamilyId: string;
+   expiresAt: Date;
+}
+
+export interface createUserSessionDTO {
+   id: string
+   userId: string;
+   refreshTokenHash: string;
+   tokenFamilyId: string;
+   expiresAt: Date;
+}

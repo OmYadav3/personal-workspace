@@ -57,6 +57,7 @@ export const generateRefreshToken = (userId: string, sessionId: string, familyTo
 }
 
 
+
 /* GENERATES AN ACCESS TOKEN */
 export const generateAccessToken = (userId: string, sessionId: string) => {
    const payload: AccessTokenPayload = {

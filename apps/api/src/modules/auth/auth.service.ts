@@ -1,5 +1,6 @@
 import { ApiError } from "../../utils/ApiError.js";
 import { hashPassword } from "../../utils/auth.helper.js";
+// import { generateAccessTokentest } from "../../utils/jwt.helper.js";
 import type { RegisterUserDTO } from "./auth.dto.js";
 import { AuthMapper } from "./auth.mapper.js";
 import { AuthRepository } from "./auth.repository.js";
@@ -7,7 +8,7 @@ import { AuthRepository } from "./auth.repository.js";
 export const AuthService = {
    registerUser: async (data: RegisterUserDTO) => {
       const { name, username, email, password } = data;
-
+      
       const isUsernameExist = await AuthRepository.findUserByUsername(username);
       if (isUsernameExist) {
          throw new ApiError(409, "Username Already Exists");
@@ -27,6 +28,13 @@ export const AuthService = {
          passwordHash: hashedPassword,
       });
 
+      
+
+
       return AuthMapper.toUserResponse(newUser);
    },
+
+
+
+   
 };
