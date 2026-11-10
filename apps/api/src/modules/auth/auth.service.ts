@@ -1,4 +1,5 @@
-import type { loginUserDTO, RegisterUserDTO } from "./auth.dto.js";
+import type { loginUserDTO, RegisterUserDTO, UserLoggedOutDTO } from "./auth.dto.js";
+import type { JwtPayload } from "jsonwebtoken";
 
 import { AuthRepository } from "./auth.repository.js";
 import { hashPassword, verifyPassword } from "../../utils/auth.helper.js";
@@ -11,7 +12,13 @@ import {
    generateTokenFamilyId,
    getSessionExpiry,
 } from "../../utils/session.helper.js";
-import { generateAccessToken, generateRefreshToken, HashToken } from "../../utils/jwt.helper.js";
+import {
+   generateAccessToken,
+   generateRefreshToken,
+   HashToken,
+   verifyHashedToken,
+   verifyRefreshToken,
+} from "../../utils/jwt.helper.js";
 
 export const AuthService = {
    registerUser: async (data: RegisterUserDTO) => {
@@ -38,6 +45,7 @@ export const AuthService = {
 
       return AuthMapper.toUserResponse(newUser);
    },
+
 
    loginUser: async (data: loginUserDTO, deviceInfo?: string) => {
       const { username, password } = data;
@@ -83,10 +91,118 @@ export const AuthService = {
          return {
             user: AuthMapper.toUserResponse(user),
             accessToken,
-            refreshToken: refreshTokenHash,
+            refreshToken: refreshToken,
          };
       } else {
          console.log("Session not Created yet! Please Try Again ");
       }
    },
+
+
+   logOutUser: async (data: UserLoggedOutDTO) => {
+      const { refreshToken, sessionId, userId } = data;
+
+      // 1. Verify refresh JWT
+      const decodedToken: JwtPayload | string = verifyRefreshToken(refreshToken);
+
+      if (
+         typeof decodedToken === "string" ||
+         !decodedToken.sub ||
+         typeof decodedToken.sid !== "string" ||
+         typeof decodedToken.fid !== "string"
+      ) {
+         throw new ApiError(401, "Invalid refresh token");
+      }
+
+      // 2. Verify JWT claims
+      if (decodedToken.sub !== userId || decodedToken.sid !== sessionId) {
+         throw new ApiError(401, "Invalid refresh token");
+      }
+
+      // 3. Find session
+      const session = await SessionRepository.findSession(sessionId, userId);
+
+      if (!session || session.revokedAt !== null) {
+         throw new ApiError(401, "Unauthorized request");
+      }
+
+      // 4. Verify token family
+      if (decodedToken.fid !== session.tokenFamilyId) {
+         throw new ApiError(401, "Invalid refresh token");
+      }
+
+      // 5. Verify SHA-256 refresh token hash
+      const isValidToken = verifyHashedToken(session.refreshTokenHash, refreshToken);
+
+      if (!isValidToken) {
+         throw new ApiError(401, "Invalid refresh token");
+      }
+
+      // 6. Revoke current device session
+      const sessionRevoked = await SessionRepository.revokeSession({
+         userId,
+         sessionId,
+         tokenFamilyId: session.tokenFamilyId,
+      });
+
+      if (sessionRevoked.count !== 1) {
+         throw new ApiError(409, "Session could not be revoked");
+      }
+
+      return true;
+   },
+
+
+   logOutUserAll: async (data: UserLoggedOutDTO) => {
+      const { refreshToken, sessionId, userId } = data;
+
+      // 1. Verify refresh JWT
+      const decodedToken: JwtPayload | string = verifyRefreshToken(refreshToken);
+
+      if (
+         typeof decodedToken === "string" ||
+         !decodedToken.sub ||
+         typeof decodedToken.sid !== "string" ||
+         typeof decodedToken.fid !== "string"
+      ) {
+         throw new ApiError(401, "Invalid refresh token");
+      }
+
+      // 2. Verify JWT claims
+      if (decodedToken.sub !== userId || decodedToken.sid !== sessionId) {
+         throw new ApiError(401, "Invalid refresh token");
+      }
+
+      // 3. Find session
+      const session = await SessionRepository.findSession(sessionId, userId);
+
+      if (!session || session.revokedAt !== null) {
+         throw new ApiError(401, "Unauthorized request");
+      }
+
+      // 4. Verify token family
+      if (decodedToken.fid !== session.tokenFamilyId) {
+         throw new ApiError(401, "Invalid refresh token");
+      }
+
+      // 5. Verify SHA-256 refresh token hash
+      const isValidToken = verifyHashedToken(session.refreshTokenHash, refreshToken);
+
+      if (!isValidToken) {
+         throw new ApiError(401, "Invalid refresh token");
+      }
+
+      // 6. Revoke current device session
+      const sessionRevoked = await SessionRepository.revokeAllSession({
+         userId
+      });
+
+      if (sessionRevoked.count !== 1) {
+         throw new ApiError(409, "Session could not be revoked");
+      }
+
+      return true;
+   },
+
+   refreshToken: async () => {}
 };

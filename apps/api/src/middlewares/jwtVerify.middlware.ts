@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { AuthRepository } from "../modules/auth/auth.repository.js";
 import { verifyAccessToken } from "../utils/jwt.helper.js";
 import type { JwtPayload } from "jsonwebtoken";
+import { SessionRepository } from "../modules/auth/session.repository.js";
 
 export const jwtVerify: RequestHandler = async (
    req: Request,
@@ -23,28 +24,33 @@ export const jwtVerify: RequestHandler = async (
          console.log("Token Not Found in headers and cookies ");
          throw new ApiError(401, "unAuthorised Request");
       }
-      
 
       const decodedToken: JwtPayload | string = verifyAccessToken(token);
       if (typeof decodedToken === "string") {
-            throw new ApiError(401, "Invalid token");
-         }
-      
+         throw new ApiError(401, "Invalid token");
+      }
+
       const userId = decodedToken.sub;
       const sessionId = decodedToken.sid;
 
-
-      const user = await AuthRepository.findUserById(userId as string);
-      if (!user) {
+      const IsUserExist = await AuthRepository.findUserById(userId as string);
+      if (!IsUserExist) {
          throw new ApiError(401, "User not found");
       }
-
-      // TODO:   check the session found by id or not 
-      // TODO:   check the session is already revoked or not 
-
+      if (IsUserExist.status !== "ACTIVE") {
+         throw new ApiError(401, "User Account are not found");
+      }
+      const IsSessionExist = await SessionRepository.findSessionById(sessionId as string);
+      if (!IsSessionExist) {
+         throw new ApiError(401, "Session not found");
+      }
+      if (IsSessionExist.revokedAt !== null) {
+         throw new ApiError(401, "Session not found");
+      }
+      
       res.locals.auth = {
          userId,
-         sessionId
+         sessionId,
       };
 
       return next();

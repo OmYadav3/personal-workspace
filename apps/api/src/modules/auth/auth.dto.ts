@@ -1,4 +1,4 @@
-// DTO - Data Transfer Object 
+// DTO - Data Transfer Object
 
 /* Controller → Service */
 export interface RegisterUserDTO {
@@ -26,10 +26,11 @@ export interface UserResponseDTO {
    createdAt: Date;
 }
 
+/* Service → Repository */
 export interface loginUserDTO {
-   username: string
+   username: string;
    password: string;
-   deviceInfo?: string
+   deviceInfo?: string;
 }
 
 export interface UserLoginResponseDTO {
@@ -38,17 +39,34 @@ export interface UserLoginResponseDTO {
    username: string;
    email: string;
    status: string;
-   refreshToken: string,
-   accessToken: string
+   refreshToken: string;
+   accessToken: string;
    createdAt: Date;
 }
 
-
 export interface createSessionDTO {
-   id: string
+   id: string;
    userId: string;
    refreshTokenHash: string;
    tokenFamilyId: string;
-   deviceInfo?: string | undefined
+   deviceInfo?: string | undefined;
    expiresAt: Date;
+}
+
+export interface UserLoggedOutDTO {
+   refreshToken: string;
+   sessionId: string;
+   userId: string;
+}
+
+/* Service → Repository */
+export interface UserLoggedOutSesionDTO {
+   sessionId: string;
+   userId: string;
+   tokenFamilyId: string;
+}
+
+/* Service → Repository */
+export interface UserLoggedOutAllSesionDTO {
+   userId: string;
 }

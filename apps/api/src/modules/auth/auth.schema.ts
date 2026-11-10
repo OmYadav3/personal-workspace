@@ -56,3 +56,15 @@ export const loginUserSchema = z
       query: z.object({}),
    })
    .strict();
+
+export const logOutUserSchema = z
+   .object({
+      body: z.object({
+         refreshToken: z
+            .string()
+            .trim()
+      }),
+      params: z.object({}),
+      query: z.object({}),
+   })
+   .strict();
