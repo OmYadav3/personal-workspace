@@ -54,7 +54,60 @@ export const loginUserController = asyncHandler(
    },
 );
 
-export const logoutUserController = asyncHandler( async () => {} );
+export const logOutUserController = asyncHandler(
+   async (req: Request, res: Response): Promise<void> => {
+      const refreshToken = req.cookies.refreshToken;
+      const { sessionId, userId } = res.locals.auth;
 
+      await AuthService.logOutUser({
+         refreshToken,
+         sessionId,
+         userId,
+      });
 
-export const logoutAllUserController = asyncHandler( async () => {} );
+      res.clearCookie("accessToken", {
+         httpOnly: true,
+         secure: true,
+         sameSite: "lax",
+         path: "/",
+      });
+
+      res.clearCookie("refreshToken", {
+         httpOnly: true,
+         secure: true,
+         sameSite: "lax",
+         path: "/",
+      });
+
+      res.status(200).json(new ApiResponse(200, null, "User LoggedOut Successfully", true));
+   },
+);
+
+export const logOutAllUserController = asyncHandler(
+   async (req: Request, res: Response): Promise<void> => {
+      const refreshToken = req.cookies.refreshToken;
+      const { sessionId, userId } = res.locals.auth;
+
+      await AuthService.logOutUser({
+         refreshToken,
+         sessionId,
+         userId,
+      });
+
+      res.clearCookie("accessToken", {
+         httpOnly: true,
+         secure: true,
+         sameSite: "lax",
+         path: "/",
+      });
+
+      res.clearCookie("refreshToken", {
+         httpOnly: true,
+         secure: true,
+         sameSite: "lax",
+         path: "/",
+      });
+
+      res.status(200).json(new ApiResponse(200, null, "User LoggedOut Successfully", true));
+   },
+);

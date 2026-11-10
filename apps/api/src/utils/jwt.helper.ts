@@ -1,7 +1,7 @@
 import type { SignOptions, Algorithm, VerifyOptions } from "jsonwebtoken";
 import jwt from "jsonwebtoken";
 import { config } from "../config/config.js";
-import { createHash } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 
 /* MENTIONS THE INTERFACE FOR REFRESH TOKEN PAYLOAD */
 interface RefreshTokenPayload {
@@ -71,7 +71,20 @@ export const verifyAccessToken = (token: string) => {
    return jwt.verify(token, config.ACCESS_TOKEN_SECRET, AccessTokenVerifyOptions);
 };
 
-/* Hashed the token  */
+/* HASHED THE TOKEN   */
 export const HashToken = (token: string): string => {
    return createHash("sha256").update(token).digest("hex");
+};
+
+/* HASTOKEN TOKEN VERIFY  */
+export const verifyHashedToken = (storedToken: string, refreshToken: string): boolean => {
+   const incomingHashToken = HashToken(refreshToken);
+   const storedBuffer = Buffer.from(storedToken, "hex");
+   const incomingBuffer = Buffer.from(incomingHashToken, "hex");
+
+   if (storedBuffer.length !== incomingBuffer.length) {
+      return false;
+   }
+
+   return timingSafeEqual(storedBuffer, incomingBuffer);
 };
