@@ -1,8 +1,9 @@
 import type { Request, Response, NextFunction, RequestHandler } from "express";
+import type { JwtPayload } from "jsonwebtoken";
+
 import { ApiError } from "../utils/ApiError.js";
 import { AuthRepository } from "../modules/auth/auth.repository.js";
 import { verifyAccessToken } from "../utils/jwt.helper.js";
-import type { JwtPayload } from "jsonwebtoken";
 import { SessionRepository } from "../modules/auth/session.repository.js";
 
 export const jwtVerify: RequestHandler = async (
@@ -11,6 +12,7 @@ export const jwtVerify: RequestHandler = async (
    next: NextFunction,
 ) => {
    try {
+      // Exract Token
       let token;
 
       /* CHECK HEADER FIRST FOR TOKEN */
@@ -18,36 +20,54 @@ export const jwtVerify: RequestHandler = async (
          token = req.headers.authorization.split(" ")[1];
       }
       /* THEN CHECK COOKIES FOR TOKEN  */
-      else if (req.cookies?.accessToken) {
+      else if (typeof req.cookies?.accessToken === "string") {
          token = req.cookies.accessToken;
       } else {
          console.log("Token Not Found in headers and cookies ");
          throw new ApiError(401, "unAuthorised Request");
       }
 
-      const decodedToken: JwtPayload | string = verifyAccessToken(token);
-      if (typeof decodedToken === "string") {
-         throw new ApiError(401, "Invalid token");
+      // 2. Verify JWT signature and expiry
+      const decodedToken: JwtPayload | string = verifyAccessToken(token as string);
+
+      if (
+         typeof decodedToken === "string" ||
+         typeof decodedToken.sub !== "string" ||
+         typeof decodedToken.sid !== "string"
+      ) {
+         throw new ApiError(401, "Invalid access token");
       }
 
       const userId = decodedToken.sub;
       const sessionId = decodedToken.sid;
 
-      const IsUserExist = await AuthRepository.findUserById(userId as string);
-      if (!IsUserExist) {
+      // 3. Verify session
+      const session = await SessionRepository.findSessionById(sessionId);
+
+      if (!session || session.userId !== userId) {
+         throw new ApiError(401, "Invalid session");
+      }
+
+      if (session.revokedAt !== null) {
+         throw new ApiError(401, "Session has been revoked");
+      }
+
+      if (session.expiresAt <= new Date()) {
+         throw new ApiError(401, "Session has expired");
+      }
+
+      // 4. Verify user
+      const user = await AuthRepository.findUserById(userId);
+
+      if (!user) {
          throw new ApiError(401, "User not found");
       }
-      if (IsUserExist.status !== "ACTIVE") {
-         throw new ApiError(401, "User Account are not found");
+
+      if (user.status !== "ACTIVE") {
+         throw new ApiError(403, "User account is not active");
       }
-      const IsSessionExist = await SessionRepository.findSessionById(sessionId as string);
-      if (!IsSessionExist) {
-         throw new ApiError(401, "Session not found");
-      }
-      if (IsSessionExist.revokedAt !== null) {
-         throw new ApiError(401, "Session not found");
-      }
-      
+
+      // 5. Attach authenticated identity
       res.locals.auth = {
          userId,
          sessionId,
@@ -55,9 +75,6 @@ export const jwtVerify: RequestHandler = async (
 
       return next();
    } catch (error) {
-      return res.status(401).json({
-         success: false,
-         message: "Invalid or expired token",
-      });
+      return next(error);
    }
 };
