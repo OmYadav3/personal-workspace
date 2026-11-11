@@ -1,4 +1,5 @@
 import type {
+   CurrentUserDTO,
    loginUserDTO,
    refreshTokenDTO,
    RegisterUserDTO,
@@ -26,7 +27,6 @@ import {
 } from "../../utils/jwt.helper.js";
 
 export const AuthService = {
-   
    registerUser: async (data: RegisterUserDTO) => {
       const { name, username, email, password } = data;
       console.log(username);
@@ -209,7 +209,7 @@ export const AuthService = {
 
    refreshToken: async (token: refreshTokenDTO) => {
       const { refreshToken } = token;
-      
+
       const decodedToken: JwtPayload | string = verifyRefreshToken(refreshToken);
 
       if (
@@ -254,7 +254,6 @@ export const AuthService = {
       const newAccessToken = generateAccessToken(userId, sessionId);
       const newRefreshToken = generateRefreshToken(userId, sessionId, tokenFamilyId);
 
-
       const refreshTokenHash = HashToken(newRefreshToken);
       const oldRefreshTokenHash = HashToken(refreshToken);
 
@@ -275,5 +274,16 @@ export const AuthService = {
       };
    },
 
+   getCurrentUser: async (userId: CurrentUserDTO) => {
+      const user = await AuthRepository.findUserById(userId);
+      if (!user) {
+         throw new ApiError(404, "User not found");
+      }
 
+      if (user.status !== "ACTIVE") {
+         throw new ApiError(403, "User account is not active");
+      }
+
+      return AuthMapper.toUserResponse(user);
+   },
 };

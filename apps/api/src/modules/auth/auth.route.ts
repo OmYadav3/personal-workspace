@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { loginUserController, logOutAllUserController, logOutUserController, refreshTokencontroller, registerUserController } from './auth.controller.js';
+import { getCurrentUserController, loginUserController, logOutAllUserController, logOutUserController, refreshTokencontroller, registerUserController } from './auth.controller.js';
 import { validate } from '../../middlewares/validate.middleware.js';
 import { loginUserSchema, registerUserSchema } from './auth.schema.js';
 import { jwtVerify } from '../../middlewares/jwtVerify.middlware.js';
@@ -36,6 +36,11 @@ router.route('/logOut-all').get(
 router.route('/refresh').post(
    jwtVerify,
    refreshTokencontroller);
+
+/* REFRESH ROUTE  */
+router.route('/current-user').get(
+   jwtVerify,
+   getCurrentUserController);
 
 
 export default router;  
