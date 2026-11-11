@@ -70,3 +70,14 @@ export interface UserLoggedOutSesionDTO {
 export interface UserLoggedOutAllSesionDTO {
    userId: string;
 }
+
+export interface refreshTokenDTO {
+   refreshToken: string;
+}
+
+export interface refreshTokenSessionDTO {
+   sessionId: string,
+   userId: string,
+   oldRefreshTokenHash: string,
+   refreshTokenHash: string,
+}

@@ -57,7 +57,8 @@ export const loginUserSchema = z
    })
    .strict();
 
-export const logOutUserSchema = z
+
+export const refreshTokenSchema = z
    .object({
       body: z.object({
          refreshToken: z

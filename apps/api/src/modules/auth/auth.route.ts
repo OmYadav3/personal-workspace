@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { loginUserController, logOutAllUserController, logOutUserController, registerUserController } from './auth.controller.js';
+import { loginUserController, logOutAllUserController, logOutUserController, refreshTokencontroller, registerUserController } from './auth.controller.js';
 import { validate } from '../../middlewares/validate.middleware.js';
-import { loginUserSchema, logOutUserSchema, registerUserSchema } from './auth.schema.js';
+import { loginUserSchema, registerUserSchema } from './auth.schema.js';
 import { jwtVerify } from '../../middlewares/jwtVerify.middlware.js';
 
 
@@ -21,17 +21,21 @@ router.route('/login').post(
    loginUserController);
 
 /* LOGOUT ROUTE - SINGLE DEVICE */
-router.route('/logOut').post(
+router.route('/logOut').get(
    jwtVerify,
-   validate(logOutUserSchema),
    logOutUserController);
 
 
 /* LOGOUT ROUTE - MULTIPLE DEVICES */
-router.route('/logOut-all').post(
+router.route('/logOut-all').get(
    jwtVerify,
-   validate(logOutUserSchema),
    logOutAllUserController);
+
+
+/* REFRESH ROUTE  */
+router.route('/refresh').post(
+   jwtVerify,
+   refreshTokencontroller);
 
 
 export default router;  
