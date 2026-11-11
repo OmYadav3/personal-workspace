@@ -21,13 +21,13 @@ router.route('/login').post(
    loginUserController);
 
 /* LOGOUT ROUTE - SINGLE DEVICE */
-router.route('/logOut').get(
+router.route('/logOut').post(
    jwtVerify,
    logOutUserController);
 
 
 /* LOGOUT ROUTE - MULTIPLE DEVICES */
-router.route('/logOut-all').get(
+router.route('/logOut-all').post(
    jwtVerify,
    logOutAllUserController);
 
