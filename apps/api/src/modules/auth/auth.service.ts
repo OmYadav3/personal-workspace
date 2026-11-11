@@ -1,4 +1,9 @@
-import type { loginUserDTO, RegisterUserDTO, UserLoggedOutDTO } from "./auth.dto.js";
+import type {
+   loginUserDTO,
+   refreshTokenDTO,
+   RegisterUserDTO,
+   UserLoggedOutDTO,
+} from "./auth.dto.js";
 import type { JwtPayload } from "jsonwebtoken";
 
 import { AuthRepository } from "./auth.repository.js";
@@ -21,6 +26,7 @@ import {
 } from "../../utils/jwt.helper.js";
 
 export const AuthService = {
+   
    registerUser: async (data: RegisterUserDTO) => {
       const { name, username, email, password } = data;
       console.log(username);
@@ -45,7 +51,6 @@ export const AuthService = {
 
       return AuthMapper.toUserResponse(newUser);
    },
-
 
    loginUser: async (data: loginUserDTO, deviceInfo?: string) => {
       const { username, password } = data;
@@ -98,7 +103,6 @@ export const AuthService = {
       }
    },
 
-
    logOutUser: async (data: UserLoggedOutDTO) => {
       const { refreshToken, sessionId, userId } = data;
 
@@ -123,7 +127,7 @@ export const AuthService = {
       const session = await SessionRepository.findSession(sessionId, userId);
 
       if (!session || session.revokedAt !== null) {
-         throw new ApiError(401, "Unauthorized request");
+         throw new ApiError(401, "Session has been revoked");
       }
 
       // 4. Verify token family
@@ -151,7 +155,6 @@ export const AuthService = {
 
       return true;
    },
-
 
    logOutUserAll: async (data: UserLoggedOutDTO) => {
       const { refreshToken, sessionId, userId } = data;
@@ -194,7 +197,7 @@ export const AuthService = {
 
       // 6. Revoke current device session
       const sessionRevoked = await SessionRepository.revokeAllSession({
-         userId
+         userId,
       });
 
       if (sessionRevoked.count !== 1) {
@@ -204,5 +207,73 @@ export const AuthService = {
       return true;
    },
 
-   refreshToken: async () => {}
+   refreshToken: async (token: refreshTokenDTO) => {
+      const { refreshToken } = token;
+      
+      const decodedToken: JwtPayload | string = verifyRefreshToken(refreshToken);
+
+      if (
+         typeof decodedToken === "string" ||
+         !decodedToken.sub ||
+         typeof decodedToken.sid !== "string" ||
+         typeof decodedToken.fid !== "string"
+      ) {
+         throw new ApiError(401, "Invalid refresh token");
+      }
+
+      const { sub: userId, sid: sessionId, fid: tokenFamilyId } = decodedToken;
+
+      const session = await SessionRepository.findSessionById(sessionId);
+      if (!session) {
+         throw new ApiError(401, "Invalid Session");
+      }
+      if (session.userId !== userId) {
+         throw new ApiError(401, "Invalid Session");
+      }
+      if (session.tokenFamilyId !== tokenFamilyId) {
+         throw new ApiError(401, "Invalid token family");
+      }
+      if (session.revokedAt !== null) {
+         throw new ApiError(401, "Session has been revoked");
+      }
+      if (session.expiresAt <= new Date()) {
+         throw new ApiError(401, "Session has expired");
+      }
+
+      const user = await AuthRepository.findUserById(userId);
+      if (!user || user.status !== "ACTIVE") {
+         throw new ApiError(403, "User account is not active");
+      }
+
+      const isTokenValid = verifyHashedToken(session.refreshTokenHash, refreshToken);
+      if (!isTokenValid) {
+         throw new ApiError(401, " Invalid refresh Token");
+      }
+
+      // generate new tokens
+      const newAccessToken = generateAccessToken(userId, sessionId);
+      const newRefreshToken = generateRefreshToken(userId, sessionId, tokenFamilyId);
+
+
+      const refreshTokenHash = HashToken(newRefreshToken);
+      const oldRefreshTokenHash = HashToken(refreshToken);
+
+      const sessionUpdated = await SessionRepository.SessionUpdate({
+         sessionId,
+         userId,
+         oldRefreshTokenHash,
+         refreshTokenHash,
+      });
+
+      if (!sessionUpdated) {
+         throw new ApiError(401, "RefershToken is not longer valid");
+      }
+
+      return {
+         accessToken: newAccessToken,
+         refreshToken: newRefreshToken,
+      };
+   },
+
+
 };

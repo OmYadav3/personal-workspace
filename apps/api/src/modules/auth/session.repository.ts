@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prsima.js";
-import type { createSessionDTO, UserLoggedOutAllSesionDTO, UserLoggedOutSesionDTO } from "./auth.dto.js";
+import type { createSessionDTO, refreshTokenSessionDTO, UserLoggedOutAllSesionDTO, UserLoggedOutSesionDTO } from "./auth.dto.js";
 
 export const SessionRepository = {
    findSession: async (sessionId: string, userId: string) => {
@@ -78,6 +78,21 @@ export const SessionRepository = {
             }
          }
       )
-   }
+   },
 
+   SessionUpdate: async (data: refreshTokenSessionDTO) => {
+      const result =  await prisma.session.updateMany({
+         where: {
+            id: data.sessionId,
+            userId: data.userId,
+            refreshTokenHash: data.oldRefreshTokenHash,
+            revokedAt: null,
+         },
+         data: {
+            refreshTokenHash: data.refreshTokenHash
+         }
+      });
+
+      return result.count === 1; // that means session succesfully updated 
+   }
 };
