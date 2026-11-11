@@ -115,7 +115,7 @@ export const logOutAllUserController = asyncHandler(
 export const refreshTokencontroller = asyncHandler(
    async (req: Request, res: Response): Promise<void> => {
       const refreshToken: refreshTokenDTO = {
-         refreshToken: req.cookies?.refreshToken
+         refreshToken: req.cookies?.refreshToken,
       };
 
       const token = await AuthService.refreshToken(refreshToken);
@@ -139,3 +139,11 @@ export const refreshTokencontroller = asyncHandler(
       res.status(200).json(new ApiResponse(200, null, "Tokens refreshed successfully"));
    },
 );
+
+export const getCurrentUserController = asyncHandler(async (_req: Request, res: Response) => {
+   const { userId } = res.locals.auth;
+
+   const user = await AuthService.getCurrentUser(userId);
+
+   res.status(200).json(new ApiResponse(200, user, "User Details fetch Successfully"));
+});

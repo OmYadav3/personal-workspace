@@ -81,3 +81,5 @@ export interface refreshTokenSessionDTO {
    oldRefreshTokenHash: string,
    refreshTokenHash: string,
 }
+
+export type CurrentUserDTO = string;
